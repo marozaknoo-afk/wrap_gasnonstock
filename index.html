@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#ffffff">
+  <title>มูลค่ายาคงคลัง</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --fg: #334155;
+      --accent: #2563eb;
+      --track: #e2e8f0;
+      /* ความสูงของแถบ "แอปพลิเคชันนี้สร้างโดยผู้ใช้ Google Apps Script" ที่จะเลื่อนซ่อนออกนอกจอ */
+      --banner-h: 40px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #0f172a; --fg: #cbd5e1; --accent: #60a5fa; --track: #1e293b; }
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    /* กรอบครอบ iframe: เต็มจอจริง รวมพื้นที่ safe-area */
+    #viewport {
+      position: fixed;
+      inset: 0;
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;            /* ตัดส่วนแถบ banner ที่เลื่อนขึ้นไปนอกจอ */
+    }
+
+    iframe#app {
+      position: absolute;
+      top: calc(var(--banner-h) * -1);   /* ดันขึ้นเพื่อซ่อนแถบ Google */
+      left: 0;
+      width: 100%;
+      height: calc(100% + var(--banner-h));
+      border: 0;
+      outline: 0;
+      display: block;
+      overflow: hidden;
+    }
+
+    /* Loading screen */
+    #loader {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: "Sarabun", "Noto Sans Thai", system-ui, -apple-system, "Segoe UI", sans-serif;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+      transition: opacity .5s ease, visibility .5s ease;
+    }
+    #loader.hide { opacity: 0; visibility: hidden; pointer-events: none; }
+
+    .spinner {
+      width: 44px;
+      height: 44px;
+      border: 4px solid var(--track);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    .title { font-size: 1.15rem; font-weight: 600; }
+    .sub   { font-size: .9rem; opacity: .7; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) {
+      .spinner { animation-duration: 2s; }
+      #loader  { transition-duration: .01s; }
+    }
+  </style>
+</head>
+<body>
+  <div id="loader" role="status" aria-live="polite">
+    <div class="spinner"></div>
+    <div class="title">มูลค่ายาคงคลัง</div>
+    <div class="sub">กำลังโหลดข้อมูล…</div>
+  </div>
+
+  <div id="viewport">
+    <!-- src ถูกใส่ด้วย JS เพื่อไม่ให้ URL จริงปรากฏตรงๆ ใน HTML -->
+    <iframe id="app"
+            title="มูลค่ายาคงคลัง"
+            allow="fullscreen"
+            allowfullscreen
+            scrolling="no"
+            referrerpolicy="no-referrer"></iframe>
+  </div>
+
+  <script>
+    (function () {
+      // ★ ใส่ URL เต็มของ Web App ตรงนี้ (แนะนำให้ใช้ลิงก์ที่ลงท้าย /exec จากการ Deploy)
+      var PARTS = [
+        "https://script.google.com/macros/s/",
+        "AKfycbylhZnH4Qe_T4...",   // ← แทนที่ด้วย Deployment ID เต็ม
+        "/exec"
+      ];
+
+      var frame  = document.getElementById("app");
+      var loader = document.getElementById("loader");
+      var done   = false;
+
+      function hideLoader() {
+        if (done) return;
+        done = true;
+        loader.classList.add("hide");
+        setTimeout(function () { loader.style.display = "none"; }, 600);
+      }
+
+      frame.addEventListener("load", hideLoader);
+      setTimeout(hideLoader, 20000);   // กันค้าง ถ้า event load ไม่ยิง
+      frame.src = PARTS.join("");
+    })();
+  </script>
+</body>
+</html>
